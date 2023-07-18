@@ -7,3 +7,4 @@ mongoose.connect(process.env.MONGODB)
 }).catch(() => {
     console.log("Failed to connect")
 })
+
