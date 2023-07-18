@@ -53,4 +53,46 @@ router.post('/addBook', async (req, res) => {
   });
   
 
+// edit a book's info
+router.put('/editBook/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { title, description } = req.body;
+  
+      const book = await Book.findById(id);
+  
+      if (!book) {
+        return res.status(404).json({ error: 'Book not found' });
+      }
+  
+      book.title = title;
+      book.description = description;
+
+      await book.save();
+  
+      return res.status(200).json(book);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
+// DELETE a book
+router.delete('/deleteBook/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deletedBook = await Book.findByIdAndDelete(id);
+  
+      if (!deletedBook) {
+        return res.status(404).json({ error: 'Book not found' });
+      }
+  
+      return res.status(200).json({ message: 'Book deleted successfully' });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
+
 module.exports = router
