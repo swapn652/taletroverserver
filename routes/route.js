@@ -2,6 +2,8 @@ const express = require('express')
 const router  = express.Router()
 const Book = require('../models/bookModel')
 const Author = require('../models/authorModel')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 router.use(express.json())
 
@@ -112,17 +114,46 @@ router.delete('/deleteBook/:id', async (req, res) => {
 // POST new author
 router.post('/addAuthor', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { email, password } = req.body;
+
+    // Hash the password using bcrypt
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const author = new Author({
-      name,
       email,
-      password,
+      password: hashedPassword,
     });
 
     await author.save();
 
     return res.status(201).json(author);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+const secretKey = process.env.JWT_SECRET_KEY || 'default-secret-key'
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const author = await Author.findOne({ email });
+
+    if (!author) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, author.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const token = jwt.sign({ id: author._id }, secretKey);
+
+    return res.status(200).json({ token });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Internal server error' });
