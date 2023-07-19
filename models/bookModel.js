@@ -11,6 +11,10 @@ const bookSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  story: {
+    type: String,
+    required: true
+  },
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Author',
