@@ -113,7 +113,6 @@ router.delete('/deleteBook/:id', async (req, res) => {
 const secretKey = process.env.JWT_SECRET_KEY || 'default-secret-key'
 
 // POST new author
-// POST new author
 router.post('/addAuthor', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -166,6 +165,28 @@ router.post('/login', async (req, res) => {
   }
 });
 
+router.get("/getUserData", async (req, res) => {
+  const token = req.headers.authorization;
+  if (!token) {
+    return res.status(401).json({ error: "No token provided" });
+  }
+
+  try {
+    const decodedToken = jwt.verify(token, secretKey);
+    const { id, email } = decodedToken;
+
+    // Assuming you have the User model, fetch the user data from the database
+    // For example:
+    // const user = await User.findById(id);
+    // if (!user) {
+    //   return res.status(404).json({ error: "User not found" });
+    // }
+
+    return res.status(200).json({ id, email });
+  } catch (error) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+});
 
 // GET all authors
 router.get('/authors', async (req, res) => {
