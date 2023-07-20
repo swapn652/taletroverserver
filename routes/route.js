@@ -110,7 +110,9 @@ router.delete('/deleteBook/:id', async (req, res) => {
     }
   });
 
+const secretKey = process.env.JWT_SECRET_KEY || 'default-secret-key'
 
+// POST new author
 // POST new author
 router.post('/addAuthor', async (req, res) => {
   try {
@@ -126,15 +128,16 @@ router.post('/addAuthor', async (req, res) => {
 
     await author.save();
 
-    return res.status(201).json(author);
+    // Generate the JWT token with the email included in the payload
+    const token = jwt.sign({ id: author._id, email: author.email }, secretKey);
+
+    return res.status(201).json({ token });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-
-const secretKey = process.env.JWT_SECRET_KEY || 'default-secret-key'
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -151,7 +154,10 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ id: author._id }, secretKey);
+    const token = jwt.sign({ id: author._id, email: author.email }, secretKey);
+    const decodedToken = jwt.decode(token);
+    const email2 = decodedToken?.email || null; 
+    console.log(email2);
 
     return res.status(200).json({ token });
   } catch (err) {
