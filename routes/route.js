@@ -38,13 +38,13 @@ router.get('/books/:id', async (req, res) => {
 // POST route for adding a new book
 router.post('/addBook', async (req, res) => {
   try {
-    const { title, description, story, authorId } = req.body;
+    const { title, description, story, author } = req.body; // Change authorId to author
 
-    // Find the author with the provided authorId
+    // Find the author with the provided author _id
     console.log()
-    const author = await Author.findById(authorId);
+    const authorSearch = await Author.findById(author); // Change author to authorSearch
 
-    if (!author) {
+    if (!authorSearch) {
       return res.status(404).json({ error: 'Author not found' });
     }
 
@@ -52,15 +52,15 @@ router.post('/addBook', async (req, res) => {
       title,
       description,
       story,
-      author: author._id, // Set the author field to the _id of the author
+      author: authorSearch._id, // Set the author field to the _id of the author
     });
 
     // Save the book to the database
     const savedBook = await newBook.save();
 
     // Update the author's books array with the newly created book's _id
-    author.books.push(savedBook._id);
-    await author.save();
+    authorSearch.books.push(savedBook._id);
+    await authorSearch.save();
 
     return res.status(201).json(savedBook);
   } catch (error) {
@@ -68,6 +68,7 @@ router.post('/addBook', async (req, res) => {
     return res.status(500).json({ error: 'Failed to add the book' });
   }
 });
+
 
 // edit a book's info
 router.put('/editBook/:id', async (req, res) => {
